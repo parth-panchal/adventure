@@ -7,6 +7,9 @@ class TextAdventureGame:
         self.load_map(map_filename)
         self.current_room = 0
         self.player_inventory = []
+        self.awaiting_direction_decision = False
+        self.valid_direction_choices = []
+        self.ambiguous_direction_command = ""
 
     def load_map(self, map_filename):
         with open(map_filename, "r") as file:
@@ -39,8 +42,22 @@ class TextAdventureGame:
                 print(f"  {item}")
 
     def process_input(self, command):
+        if self.awaiting_direction_decision:
+            if command in self.valid_direction_choices:
+                self.go([command])
+            else:
+                print(f"Please choose from {' or '.join(self.valid_direction_choices)}")
+            self.awaiting_direction_decision = False
+            self.ambiguous_direction_command = ""
+            return
+
         verb, *args = command.split()
-        if verb == "go":
+        verb = self.match_verb(verb)
+
+        all_directions = self.get_all_directions()
+        if verb in all_directions:
+            self.go([verb])
+        elif verb == "go":
             self.go(args)
         elif verb == "look":
             self.display_room()
@@ -59,11 +76,45 @@ class TextAdventureGame:
 
     def go(self, args):
         direction = " ".join(args).lower()
+        if not direction and self.awaiting_direction_decision:
+            direction = self.ambiguous_direction_command
+
+        direction = self.match_direction(direction)
+        if direction is None:
+            return  # Wait for the next input
+        elif not direction:
+            print("Sorry, you need to 'go' somewhere.")
+        else:
+            self.move_to_direction(direction)
+
+    def match_direction(self, direction):
         room = self.game_map[self.current_room]
         exits = room.get("exits", {})
-        if not direction:
-            print("Sorry, you need to 'go' somewhere.")
-        elif direction in exits:
+        matches = [exit for exit in exits if exit.startswith(direction)]
+        if len(matches) > 1:
+            self.awaiting_direction_decision = True
+            self.valid_direction_choices = matches
+            self.ambiguous_direction_command = direction
+            print(f"Did you want to go {' or '.join(matches)}?")
+            return None
+        elif len(matches) == 1:
+            return matches[0]
+        return direction
+
+    def resolve_ambiguous_direction(self, direction):
+        if direction in self.valid_direction_choices:
+            self.move_to_direction(direction)
+        else:
+            print(
+                f"Invalid direction. Please choose from {' or '.join(self.valid_direction_choices)}."
+            )
+        self.awaiting_direction_decision = False
+        self.valid_direction_choices = []
+
+    def move_to_direction(self, direction):
+        room = self.game_map[self.current_room]
+        exits = room.get("exits", {})
+        if direction in exits:
             destination = exits[direction]
             self.current_room = destination
             print(f"You go {direction}.")
@@ -74,6 +125,7 @@ class TextAdventureGame:
     def get(self, args):
         room = self.game_map[self.current_room]
         item_name = " ".join(args).lower()
+        item_name = self.match_item(item_name)
         items = room.get("items", [])
         if not item_name:
             print("Sorry, you need to 'get' something.")
@@ -83,6 +135,25 @@ class TextAdventureGame:
             print(f"You pick up the {item_name}.")
         else:
             print(f"There's no {item_name} anywhere.")
+
+    def get_all_directions(self):
+        """Get all possible directions including abbreviations."""
+        all_directions = set()
+        for room in self.game_map:
+            for exit in room.get("exits", {}):
+                all_directions.add(exit)
+                # Add abbreviation for each direction
+                all_directions.update(self.get_direction_abbreviations(exit))
+        return all_directions
+
+    def get_direction_abbreviations(self, direction):
+        """Return a set of abbreviations for a given direction."""
+        abbreviations = {direction[0]}  # First letter
+        if direction in ["northwest", "northeast", "southwest", "southeast"]:
+            abbreviations.add(
+                direction[:2]
+            )  # First two letters for compound directions
+        return abbreviations
 
     def drop(self, args):
         item_name = " ".join(args).lower()
@@ -120,6 +191,42 @@ class TextAdventureGame:
     def quit_game(self):
         print("Goodbye!")
         sys.exit(0)
+
+    def match_verb(self, verb):
+        non_directional_verbs = {
+            "get": ["ge"],
+            "drop": ["d"],
+            "look": ["l"],
+            "inventory": ["i"],
+            "help": ["h"],
+            "quit": ["q"],
+        }
+        for full_verb, abbreviations in non_directional_verbs.items():
+            if verb == full_verb or verb in abbreviations:
+                return full_verb
+        return verb
+
+    def match_direction(self, direction):
+        room = self.game_map[self.current_room]
+        exits = room.get("exits", {})
+        matches = [exit for exit in exits if exit.startswith(direction)]
+        if len(matches) == 1:
+            return matches[0]
+        elif len(matches) > 1:
+            print(f"Did you want to go {' or '.join(matches)}?")
+            return None
+        return direction
+
+    def match_item(self, item_name):
+        room = self.game_map[self.current_room]
+        items = room.get("items", [])
+        matches = [item for item in items if item_name in item]
+        if len(matches) == 1:
+            return matches[0]
+        elif len(matches) > 1:
+            print(f"Did you want to get {' or '.join(matches)}?")
+            return None
+        return item_name
 
 
 def main():
