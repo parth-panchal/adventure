@@ -209,6 +209,12 @@ class TextAdventureGame:
     def match_direction(self, direction):
         room = self.game_map[self.current_room]
         exits = room.get("exits", {})
+        
+        # Direct match - if the exact direction is entered
+        if direction in exits:
+            return direction
+
+        # Check for partial matches or abbreviations
         matches = [exit for exit in exits if exit.startswith(direction)]
         if len(matches) == 1:
             return matches[0]
