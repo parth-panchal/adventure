@@ -62,9 +62,12 @@ class TextAdventureGame:
             if verb in all_directions:
                 self.go([verb])
             else:
-                print("Invalid command. Type 'help' for a list of valid commands.")
+                print("Use 'quit' to exit.")
 
     def go(self, args):
+        if not args:
+            print("Sorry, you need to 'go' somewhere.")
+            return
         direction = " ".join(args).lower()
         if not direction and self.awaiting_direction_decision:
             direction = self.ambiguous_direction_command
@@ -277,9 +280,11 @@ def main():
     if len(sys.argv) != 2:
         print("Usage: python3 adventure.py [map filename]")
         sys.exit(1)
+    
     map_filename = sys.argv[1]
     game = TextAdventureGame(map_filename)
     game.display_room()
+    
     while True:
         try:
             command = input("What would you like to do? ").lower()
@@ -288,9 +293,11 @@ def main():
             else:
                 game.process_input(command)
         except EOFError:
-            print("Use 'quit' to exit.")
+            print("\nUse 'quit' to exit.")  # Handle Ctrl-D without exiting
         except KeyboardInterrupt:
-            game.quit_game()
+            print("\n...")
+            print("KeyboardInterrupt")
+            sys.exit(0)
 
 
 if __name__ == "__main__":
