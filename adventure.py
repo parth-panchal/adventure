@@ -42,31 +42,28 @@ class TextAdventureGame:
                 print(f"  {item}")
 
     def process_input(self, command):
-        verb, *args = command.split()
-        verb = self.match_verb(verb)
+        parts = command.split()
+        verb = self.match_verb(parts[0])
+        args = parts[1:]  # Arguments are the rest of the command
 
-        all_directions = self.get_all_directions()
-        if verb in all_directions:
-            self.go([verb])
+        if verb == "go":
+            self.go(args)
+        elif verb == "look":
+            self.display_room()
+        elif verb == "get":
+            self.get(args)
+        elif verb == "drop":
+            self.drop(args)
+        elif verb == "inventory":
+            self.display_inventory()
+        elif verb == "help":
+            self.help()
+        elif verb == "quit":
+            self.quit_game()
         else:
-            args = command.split()
-            if args and args[0] in self.compound_directions():
-                self.go(args)
-            elif verb == "go":
-                # Ignore the verb and pass the rest as arguments
-                self.go(args[1:])
-            elif verb == "look":
-                self.display_room()
-            elif verb == "get":
-                self.get(args)
-            elif verb == "drop":
-                self.drop(args)
-            elif verb == "inventory":
-                self.display_inventory()
-            elif verb == "help":
-                self.help()
-            elif verb == "quit":
-                self.quit_game()
+            all_directions = self.get_all_directions()
+            if verb in all_directions:
+                self.go([verb])
             else:
                 print("Invalid command. Type 'help' for a list of valid commands.")
 
@@ -143,22 +140,42 @@ class TextAdventureGame:
             self.current_room = destination
             print(f"You go {direction}.")
             self.display_room()
+
+            # Check for win/lose condition in the new room
+            self.check_win_condition(destination)
         else:
             print(f"There's no way to go {direction}.")
+    
+    def check_win_condition(self, room_id):
+        room = self.game_map[room_id]
+        if "winning_items" in room:
+            if all(item in self.player_inventory for item in room["winning_items"]):
+                print("Congratulations! You've won the game!")
+                sys.exit(0)  # Exit the game on winning
+            else:
+                print("You've entered the boss room but lack the necessary items. You lose!")
+                sys.exit(0)
 
     def get(self, args):
-        room = self.game_map[self.current_room]
-        item_name = " ".join(args).lower()
-        item_name = self.match_item(item_name)
-        items = room.get("items", [])
-        if not item_name:
+        if not args:
             print("Sorry, you need to 'get' something.")
-        elif item_name in items:
+            return
+
+        item_name_query = " ".join(args).lower()
+        room = self.game_map[self.current_room]
+        items = room.get("items", [])
+        matches = [item for item in items if item_name_query in item.lower()]
+
+        if len(matches) > 1:
+            print(f"Did you want to get {' or '.join(matches)}?")
+        elif len(matches) == 1:
+            item_name = matches[0]
             items.remove(item_name)
             self.player_inventory.append(item_name)
             print(f"You pick up the {item_name}.")
         else:
-            print(f"There's no {item_name} anywhere.")
+            print(f"There's no {item_name_query} anywhere.")
+
 
     def get_all_directions(self):
         """Get all possible directions including abbreviations."""
@@ -214,17 +231,19 @@ class TextAdventureGame:
         sys.exit(0)
 
     def match_verb(self, verb):
-        non_directional_verbs = {
-            "get": ["ge"],
-            "drop": ["d"],
-            "look": ["l"],
-            "inventory": ["i"],
-            "help": ["h"],
-            "quit": ["q"],
+        verb_abbreviations = {
+            "get": ["ge", "g"],
+            "drop": ["dr", "d"],
+            "look": ["lo", "l"],
+            "inventory": ["in", "i", "inv"],
+            "help": ["he", "h"],
+            "quit": ["qu", "q"],
+            # Add more abbreviations as needed
         }
-        for full_verb, abbreviations in non_directional_verbs.items():
+        for full_verb, abbreviations in verb_abbreviations.items():
             if verb == full_verb or verb in abbreviations:
                 return full_verb
+        # Return verb as is for directions and unrecognized commands
         return verb
 
     def match_direction(self, direction):
