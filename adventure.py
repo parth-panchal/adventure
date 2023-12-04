@@ -1,6 +1,6 @@
 import json
 import sys
-
+import argparse
 
 class TextAdventureGame:
     def __init__(self, map_filename):
@@ -283,12 +283,20 @@ class TextAdventureGame:
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python3 adventure.py [map filename]")
-        sys.exit(1)
+    # if len(sys.argv) != 2:
+    #     print("Usage: python3 adventure.py [map filename]")
+    #     sys.exit(1)
     
-    map_filename = sys.argv[1]
-    game = TextAdventureGame(map_filename)
+    # map_filename = sys.argv[1]
+    # game = TextAdventureGame(map_filename)
+    # game.display_room()
+
+    parser = argparse.ArgumentParser(description='Adventure Game')
+    parser.add_argument('map_filename', help='Filename of the map for the adventure game')
+
+    args = parser.parse_args()
+
+    game = TextAdventureGame(args.map_filename)
     game.display_room()
     
     while True:
