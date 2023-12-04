@@ -17,19 +17,24 @@ class TextAdventureGame:
 
     def display_room(self):
         room = self.game_map[self.current_room]
-        print(f"> {room['name']}\n\n{room['desc']}\n")
+        room_striped = f"> {room['name']}\n\n{room['desc']}".strip()
+        print(room_striped, "\n")
         self.display_items(room)
         self.display_exits(room)
 
     def display_items(self, room):
         items = room.get("items", [])
         if items:
-            print("Items:", ", ".join(items), "\n")
+            items_striped = "Items: " + ", ".join(items).strip()
+            print(items_striped, "\n")
 
     def display_exits(self, room):
         exits = room.get("exits", {})
         if exits:
-            print("Exits:", " ".join(exits.keys()), "\n")
+            # print("Exits:", " ".join(exits.keys()), "\n")
+            exits_string = "Exits: " + " ".join(exits.keys())
+            trimmed_exits_string = exits_string.strip()
+            print(trimmed_exits_string, "\n")
 
     def display_inventory(self):
         if not self.inventory:
@@ -131,7 +136,8 @@ class TextAdventureGame:
         if direction in exits:
             destination = exits[direction]
             self.current_room = destination
-            print(f"You go {direction}.\n")
+            path_striped = f"You go {direction}.\n".strip()
+            print(path_striped, "\n")
             self.display_room()
             # Check for win/lose condition in the new room
             self.check_win_condition(destination)
