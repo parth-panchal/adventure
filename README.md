@@ -163,7 +163,7 @@ We implemented a static help function designed to assist users in navigating the
 
 ## Bugs 
 
-There no known bugs or error in this code.
+Currently, there are no identified bugs or errors within the code; however, the code has not successfully passed the test cases provided on Gradescope. Further investigation and testing may be required to align with Gradescope's specific testing criteria. 
 
 ## How we tested the code
 
@@ -174,3 +174,4 @@ We created a variety of map configurations, encompassing all possible combinatio
   * We initally decided to implement the help verb as it seemed doable, but we faced a lot of challenges figuring out the correct way to implement it while following the requirements of it not just being static text. We eventually ended up not implementing it for credit as we ran out of time trying to figure out how to implement it correctly.
   * We also faced some difficulties implementing abbreviations for directions but we figured that out and resolved it
   * The output formatting took a lot of time too surprisingly, mainly trying to get the output of our game match the sample interaction provided to us in the project details. We had to pay a lot of attention to detail on capitalisation, white space, etc.
+  * Inspite of all the outputs displaying correctly byte by byte, it still dosen't passes the test cases given on gradescope

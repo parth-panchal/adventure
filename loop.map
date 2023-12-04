@@ -11,7 +11,8 @@
         "desc": "This room is simple, too, but with blue walls.",
         "exits": {
             "west": 0,
-            "south": 2
+            "south": 2,
+            "north": 3
         },
         "items": ["key"]
     },
@@ -20,7 +21,7 @@
         "desc": "You are in a simple room, with bright green walls.",
         "exits": {
             "north": 1,
-            "east": 3
+            "east": 4
         },
         "items": ["banana", "bandana"],
         "locked": {
@@ -28,11 +29,39 @@
         }
     },
     {
+        "name": "A red room",
+        "desc": "Red walls give this room a vibrant feel.",
+        "exits": {
+            "south": 1,
+            "east": 5
+        },
+        "items": ["potion"]
+    },
+    {
+        "name": "A purple room",
+        "desc": "The walls are painted a deep purple. It's quite calming.",
+        "exits": {
+            "west": 2,
+            "north": 6
+        },
+        "locked": {
+            "north": ["potion"]
+        }
+    },
+    {
+        "name": "A yellow room",
+        "desc": "Sunshine yellow walls brighten up this space.",
+        "exits": {
+            "west": 3,
+            "south": 6
+        }
+    },
+    {
         "name": "A treasure room",
         "desc": "This room glitters with treasure all around.",
         "exits": {
-            "west": 2,
-            "north": 4
+            "south": 4,
+            "east": 7
         },
         "items": ["sword", "magic wand"]
     },
@@ -40,7 +69,7 @@
         "name": "The Boss Room",
         "desc": "You've reached the final challenge room. A sense of danger fills the air.",
         "exits": {
-            "south": 3
+            "west": 6
         },
         "winning_items": ["sword", "magic wand"]
     }
