@@ -29,7 +29,10 @@ class TextAdventureGame:
     def display_exits(self, room):
         exits = room.get("exits", {})
         if exits:
-            print("Exits:", " ".join(exits.keys()), "\n")
+            # print("Exits:", " ".join(exits.keys()), "\n")
+            exits_string = "Exits: " + " ".join(exits.keys())
+            trimmed_exits_string = exits_string.strip()
+            print(trimmed_exits_string, "\n")
 
     def display_inventory(self):
         if not self.inventory:
